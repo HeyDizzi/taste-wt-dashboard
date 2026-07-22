@@ -76,7 +76,7 @@ function funnelView() {
   <div class="panel"><div class="controls">
     <label>Channel <select id="chan"><option value="">All channels</option>
       ${chans.map(c => `<option ${state.channel === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
-    <span class="fconv">${fmt(src.applied)} applicants in scope${M.funnel.outreach_note ? ' · ' + esc(M.funnel.outreach_note) : ''}</span>
+    <span class="fconv">${fmt(src.applied)} applicants in scope</span>
   </div><div class="funnel">`;
 
   const W = s => Math.max(100 * src[s] / max, 2.4);           // bar width, % of track
