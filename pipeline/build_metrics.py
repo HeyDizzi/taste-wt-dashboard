@@ -177,16 +177,20 @@ def build(persons, portal, log):
     BENCH = {"active_not_on_project", "idle"}
     MOTION = {"contracting_project", "applied_project", "testing_project"}
     decomp = {"not_in_portal": 0, "benched": 0, "in_motion": 0, "other": 0}
+    pool_availability = collections.Counter()
     for p in vetted_never_staffed:
         av = (p.get("portal") or {}).get("availability_status")
         if not p.get("portal"):
             decomp["not_in_portal"] += 1
-        elif av in BENCH:
-            decomp["benched"] += 1
-        elif av in MOTION:
-            decomp["in_motion"] += 1
+            pool_availability["not_in_portal"] += 1
         else:
-            decomp["other"] += 1
+            pool_availability[av or "no_status"] += 1
+            if av in BENCH:
+                decomp["benched"] += 1
+            elif av in MOTION:
+                decomp["in_motion"] += 1
+            else:
+                decomp["other"] += 1
     pool_ids = {id(p) for p in vetted_never_staffed}
     decomp["benched_bars_extra"] = sum(
         1 for p in persons
@@ -228,6 +232,7 @@ def build(persons, portal, log):
         "dormant": dormant, "dormant_split": dormant_split,
         "availability": dict(availability), "deal_concentration": deal_concentration,
         "dormant_decomposition": decomp,
+        "dormant_availability": dict(pool_availability),
         "rule_variants": rule_variants(persons), "provenance": provenance,
     }
 

@@ -217,49 +217,45 @@ function dormantView() {
 /* ---------- concentration uses deal-count proxy assembled client-side from dormant+headline ---------- */
 function concentrationProxyView() {
   const H = M.headline;
-  const av = M.availability || {};
-  const avOrder = Object.entries(av).sort((a, b) => b[1] - a[1]);
-  const max = Math.max(...avOrder.map(([, v]) => v), 1);
+  const pool = M.dormant_availability || {};
+  const LABELS = {
+    not_in_portal: 'not in staffing portal', active_not_on_project: 'available, not on a project',
+    idle: 'idle', contracting_project: 'contracting a project', applied_project: 'applied to a project',
+    testing_project: 'testing for a project', no_status: 'no status',
+  };
+  const TIPS = {
+    not_in_portal: 'Accepted in Notion (Welcome Sent) but never entered the staffing portal — invisible to staffing.',
+    active_not_on_project: 'Portal availability: active_not_on_project — cleared and waiting.',
+    idle: 'Portal availability: idle.',
+    contracting_project: 'Portal availability: contracting_project — deal paperwork in motion.',
+    applied_project: 'Portal availability: applied_project — waiting on a decision.',
+    testing_project: 'Portal availability: testing_project — assessment in motion.',
+    no_status: 'Portal profile without an availability label.',
+  };
+  const RED = new Set(['not_in_portal', 'active_not_on_project', 'idle']);
+  const rows = Object.entries(pool).sort((a, b) => b[1] - a[1]);
+  const max = Math.max(...rows.map(([, v]) => v), 1);
+  const total = rows.reduce((t, [, v]) => t + v, 0);
   return `<h2>Utilization &amp; concentration</h2>
   <div class="warnbox">Billable hours are <b>not tracked</b> (lifetime_hours = 0 on all 975 profiles; deal rates null).
   True concentration of billable work cannot be computed — this view shows the nearest proxies and is itself finding #1
   of the tracking gaps.</div>
   <div class="tiles">
-    <div class="tile"><div class="v">${fmt(M.deal_concentration?.multi_active ?? 3)}</div>
+    <div class="tile"><div class="v">${fmt(M.deal_concentration?.multi_active)}</div>
       <span class="l" data-tip="Experts holding >1 currently-active deal.">experts on multiple active deals</span></div>
-    <div class="tile"><div class="v">${fmt(M.deal_concentration?.active_now ?? 52)}</div>
+    <div class="tile"><div class="v">${fmt(M.deal_concentration?.active_now)}</div>
       <span class="l" data-tip="Experts with ≥1 deal currently in stage 'active'.">experts active right now</span></div>
-    <div class="tile wide"><div class="v leak">${fmt(H.vetted_never_staffed)}</div>
-      <span class="l" data-tip="Accepted, never reached a staffed deal (cross-system spine). The mini bar reconciles this with the portal's availability labels below.">vetted, never staffed</span>
-      ${decompBar()}</div>
+    <div class="tile"><div class="v leak">${fmt(H.vetted_never_staffed)}</div>
+      <span class="l" data-tip="Accepted, never reached a staffed deal (cross-system spine). Broken down below — the rows sum to exactly this number.">vetted, never staffed</span></div>
   </div>
-  <div class="panel"><h2 style="font-size:13.5px">Availability status (portal profiles)</h2>
-  ${avOrder.map(([k, v]) => `<div class="hrow"><span class="hl">${esc(k)}</span>
-    <div class="hbar ${k === 'active_not_on_project' || k === 'idle' ? 'leakc' : ''}" data-tip="${fmt(v)} profiles: ${esc(k)}"
+  <div class="panel"><h2 style="font-size:13.5px">Where the ${fmt(H.vetted_never_staffed)} sit</h2>
+  ${rows.map(([k, v]) => `<div class="hrow"><span class="hl" data-tip="${esc(TIPS[k] || k)}">${esc(LABELS[k] || k)}</span>
+    <div class="hbar ${RED.has(k) ? 'leakc' : ''}" data-tip="${fmt(v)} of the never-staffed pool: ${esc(LABELS[k] || k)}"
       style="width:${(100 * v / max).toFixed(1)}%"></div><span class="fnum">${fmt(v)}</span></div>`).join('')}
-  <p class="sub" style="margin-top:10px">Red = bench states (available but not working).</p></div>`;
+  <p class="sub" style="margin-top:10px">Σ = ${fmt(total)}. Red = unreachable or waiting (not in the portal, benched);
+  blue = in motion but never yet staffed.</p></div>`;
 }
 VIEWS[3].render = concentrationProxyView;
-
-function decompBar() {
-  const d = M.dormant_decomposition;
-  if (!d) return '';
-  const total = d.not_in_portal + d.benched + d.in_motion + d.other;
-  const segs = [
-    { k: 'not_in_portal', label: 'not in portal', n: d.not_in_portal, cls: 'dseg-red',
-      tip: 'Accepted in Notion (Welcome Sent) but never entered the staffing portal at all — invisible to staffing.' },
-    { k: 'benched', label: 'benched', n: d.benched, cls: 'dseg-red2',
-      tip: 'Portal availability = active_not_on_project or idle.' },
-    { k: 'in_motion', label: 'in motion', n: d.in_motion, cls: 'dseg-gray',
-      tip: 'Portal availability = contracting / applied to a project / testing — moving, but never yet staffed.' },
-    { k: 'other', label: 'other', n: d.other, cls: 'dseg-gray',
-      tip: 'Portal profile with no bench/motion availability label.' },
-  ].filter(s => s.n > 0);
-  return `<div class="dbar">${segs.map(s =>
-      `<div class="dseg ${s.cls}" style="flex:${s.n}" data-tip="${esc(s.tip)} (${fmt(s.n)} people)"></div>`).join('')}</div>
-    <div class="dlegend">${segs.map(s => `<span>${esc(s.label)} <b>${fmt(s.n)}</b></span>`).join('')}</div>
-    <div class="n">${fmt(total)} total · the red availability bars below also include ${fmt(d.benched_bars_extra)} previously-staffed people not in this pool</div>`;
-}
 
 /* ---------- shell ---------- */
 function render() {
