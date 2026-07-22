@@ -71,8 +71,10 @@ footer { padding: 10px 22px; color: var(--muted); font-size: 12px;
 /* funnel: centered silhouette with trapezoid connectors */
 .funnel { padding: 6px 0 2px; }
 .funrow { display: grid; grid-template-columns: 170px 1fr 110px; gap: 12px; align-items: center; }
-.fl { text-align: right; color: var(--ink-2); border-bottom: 1px dotted transparent; justify-self: end; }
+.flwrap { justify-self: end; text-align: right; }
+.fl { color: var(--ink-2); border-bottom: 1px dotted transparent; }
 .fl:hover { border-color: var(--muted); cursor: help; }
+.fsrc { font-size: 10.5px; color: var(--muted); line-height: 1.3; }
 .funtrack { position: relative; height: 30px; }
 .funbar { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
   background: var(--accent); border-radius: 4px; }

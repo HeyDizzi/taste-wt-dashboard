@@ -25,6 +25,12 @@ const FORMULAS = {
   assessment_taken: 'Portal test fields are null on all 855 deals; sampled submissions empty.',
   first_billable: 'lifetime_hours > 0 — currently 0 for every profile; billable data not tracked.',
 };
+const STAGE_SOURCES = {
+  outreached: 'HeyReach', responded: 'HeyReach', applied: 'Notion',
+  assessment_taken: 'Portal — empty', assessment_passed: 'Notion + Portal',
+  accepted: 'Notion + Portal', project_applied: 'Portal', staffed: 'Portal',
+  first_billable: 'Portal — empty', second_contract: 'Portal',
+};
 const RAMP = ['--ramp-1', '--ramp-2', '--ramp-3', '--ramp-4', '--ramp-5'];
 const STACK = ['applied', 'assessment_passed', 'accepted', 'project_applied', 'staffed_plus'];
 const STACK_LABELS = { ...STAGE_LABELS, staffed_plus: 'Staffed+ (incl. 2nd contract)' };
@@ -77,7 +83,8 @@ function funnelView() {
   let prev = null;                                             // previous measured stage
   for (const s of order) {
     if (src[s] == null) {
-      h += `<div class="fungap notinst"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
+      h += `<div class="fungap notinst"><div class="flwrap"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
+        <div class="fsrc">(${STAGE_SOURCES[s]})</div></div>
         <span class="badge">not tracked</span></div>`;
       continue;
     }
@@ -92,7 +99,8 @@ function funnelView() {
         ${isLeak ? `<span class="funleak">−${fmt(leak.lost)} · biggest leak</span>` : ''}</div>`;
     }
     h += `<div class="funrow">
-      <span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
+      <div class="flwrap"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
+        <div class="fsrc">(${STAGE_SOURCES[s]})</div></div>
       <div class="funtrack"><div class="funbar" style="width:${W(s).toFixed(2)}%"
         data-tip="${fmt(src[s])} people reached at least ${STAGE_LABELS[s]}"></div></div>
       <span class="fnum">${fmt(src[s])}</span></div>`;
