@@ -14,9 +14,11 @@
 
 | Transition | Cleaned numbers | Read |
 |---|---|---|
+| outreached → responded | 9,445 → 2,815 (30% reply) | largest in absolute heads (−6,630), but a ~30% LinkedIn reply rate is at/above channel norms — this is the cost of doing outreach, not a broken step |
+| responded → applied | 2,815 repliers → 681 applied (24%) | doc remembered ~37%; join undercount explains part of the gap |
 | applied → portfolio passed | 2,541 → 1,797 (71%) | screening is not the problem |
 | passed → accepted | 1,797 → 1,441 (80%) | nor is acceptance |
-| **accepted → any project contact** | **1,441 → 611: −830 people (58% never contacted)** | **the biggest absolute leak in the funnel** |
+| **accepted → any project contact** | **1,441 → 611: −830 people (58% never contacted)** | **the leak that matters: these people cost real vetting spend, and losing them is not channel-normal** |
 | project contact → staffed | 611 → 134 (22%) | second leak: of 855 deals, 198 sit at `invited`/pending indefinitely, 235 rejected |
 | staffed → billable | not measurable — `lifetime_hours` = 0 for every profile | instrumentation gap, not a funnel finding |
 

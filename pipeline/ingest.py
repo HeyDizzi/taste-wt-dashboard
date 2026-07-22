@@ -39,6 +39,19 @@ def load_notion(log):
     return records
 
 
+def load_heyreach(log):
+    """HeyReach outreach data — optional: pipeline runs without it (stages stay not-instrumented)."""
+    hr = RAW / "heyreach"
+    if not (hr / "campaign_leads.json").exists():
+        log("heyreach: no data — outreached/responded stay not instrumented")
+        return None
+    leads = json.loads((hr / "campaign_leads.json").read_text())
+    campaigns = json.loads((hr / "campaigns.json").read_text())
+    flat = [dict(l, campaign_id=cid) for cid, ls in leads.items() for l in ls]
+    log(f"heyreach ingest: {len(campaigns)} campaigns, {len(flat)} leads")
+    return {"campaigns": campaigns, "leads": flat}
+
+
 def load_portal(log):
     p = {
         "experts_index": json.loads((RAW / "experts_index.json").read_text())["data"],

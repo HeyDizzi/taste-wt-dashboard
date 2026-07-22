@@ -6,7 +6,7 @@ Ranked by how much they constrain the diagnosis, each with the workaround in use
 |---|---|---|---|
 | 1 | **Billable hours / payments** | `lifetime_hours` = 0 on all 975 profiles; deal `rate` null on all 855 | VAR proxy = "on an active deal"; dashboard swaps to true billable the day a timesheet/payment export lands |
 | 2 | **Assessment data** | portal test fields null everywhere; 56-deal stratified sample of submissions all empty | `Portfolio Approval` used as the vetting proxy; stages 4–5 labeled *not instrumented* on the funnel, as findings |
-| 3 | **`responded` stage** | no field in either system | funnel renders the stage as not instrumented; outreach→applied shown as one combined conversion |
+| 3 | ~~`responded` stage~~ **CLOSED 2026-07-22**: HeyReach API now feeds outreached (9,445) and responded (2,815) | was: no field in either system | remaining caveat: LinkedIn-outreach only, and the spine join undercounts (application email ≠ LinkedIn email) |
 | 4 | **Stage-transition history** | only current `stage` + one `stage_entered_at` per deal; no event log | time-in-stage computed for current stage only; cohort view limited to application-date cohorts |
 | 5 | **Cost per vetted designer** | not in trial environment | editable input, $500 tagged "assumption" until FP&A number arrives |
 | 6 | **Demand-side pipeline** (upcoming projects, revenue per project) | 8 projects visible, no pipeline/revenue fields | activation framed in people and sunk vetting cost, not revenue-at-risk |

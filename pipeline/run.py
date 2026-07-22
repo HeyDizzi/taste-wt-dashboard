@@ -29,11 +29,13 @@ def main():
     log("== ingest ==")
     notion = ingest.load_notion(log)
     portal = ingest.load_portal(log)
+    heyreach = ingest.load_heyreach(log)
 
     log("== clean ==")
     rows = clean.clean_notion(notion, log)
     rows = clean.dedupe_notion(rows, log)
-    persons = clean.resolve(rows, portal, log)
+    outreach = clean.build_outreach_index(heyreach, log)
+    persons = clean.resolve(rows, portal, log, outreach)
 
     log("== metrics ==")
     metrics = build_metrics.build(persons, portal, log)

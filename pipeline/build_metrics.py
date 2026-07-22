@@ -19,6 +19,8 @@ def furthest_stage(p):
 
     staffed_deals = [d for d in deals if d["stage"] in STAFFED_STAGES]
     reached = "outreached"  # floor: everyone in either system was at least outreached
+    if (p.get("outreach") or {}).get("replied"):
+        reached = "responded"
     if p.get("submission_ts") or cs == "applicant" or "notion" in p["sources"]:
         reached = "applied"
     if (p.get("portfolio_review") == "yes") or (port.get("portfolio_review") == "yes"):
@@ -75,19 +77,33 @@ def build(persons, portal, log):
     for p in persons:
         p["stage"], p["terminal"] = furthest_stage(p)
 
-    # ---- funnel: people reaching AT LEAST each stage (monotonic by construction of 'furthest')
+    # ---- funnel: applied+ stages use at-least-furthest (sequential in-system); the outreach
+    # stages use DIRECT EVIDENCE counts (contacted / replied), because applying does not imply
+    # having been outreached — entry channels other than LinkedIn outreach exist.
     idx = {s: i for i, s in enumerate(STAGES)}
+    has_outreach = any(p.get("outreach") for p in persons)
     def funnel_for(sub):
-        return {s: sum(1 for p in sub if idx[p["stage"]] >= idx[s]) for s in STAGES if s not in NOT_INSTRUMENTED}
+        f = {}
+        if has_outreach:
+            f["outreached"] = sum(1 for p in sub if (p.get("outreach") or {}).get("contacted"))
+            f["responded"] = sum(1 for p in sub if (p.get("outreach") or {}).get("replied"))
+        for s in STAGES:
+            if s in NOT_INSTRUMENTED or s in f:
+                continue
+            f[s] = sum(1 for p in sub if p.get("stage") and idx[p["stage"]] >= idx[s])
+        return f
+    still_dark = NOT_INSTRUMENTED - ({"outreached", "responded"} if has_outreach else set())
     funnel = {
         "combined": funnel_for(persons),
         "by_channel": {ch: funnel_for([p for p in persons if p.get("channel") == ch])
                        for ch in sorted({p.get("channel") for p in persons if p.get("channel")})},
-        "not_instrumented": sorted(NOT_INSTRUMENTED),
+        "not_instrumented": sorted(still_dark),
         "terminal": dict(collections.Counter(p["terminal"] for p in persons if p["terminal"])),
+        "outreach_note": "outreached/responded = LinkedIn outreach evidence (HeyReach); "
+                         "applied+ includes all entry channels" if has_outreach else None,
     }
     # biggest absolute leak between measured adjacent stages
-    measured = [s for s in STAGES if s not in NOT_INSTRUMENTED]
+    measured = [s for s in STAGES if s in funnel["combined"]]
     losses = [{"from": a, "to": b, "lost": funnel["combined"][a] - funnel["combined"][b]}
               for a, b in zip(measured, measured[1:])]
     funnel["biggest_leak"] = max(losses, key=lambda x: x["lost"])
@@ -168,6 +184,17 @@ def build(persons, portal, log):
             "observed": f"{len(vetted_never_staffed)}/{len(accepted)}",
         },
     }
+    if has_outreach:
+        contacted = [p for p in persons if (p.get("outreach") or {}).get("contacted")]
+        applied_from_outreach = sum(1 for p in contacted if idx.get(p["stage"], -1) >= idx["applied"])
+        replied = [p for p in contacted if p["outreach"].get("replied")]
+        applied_from_replied = sum(1 for p in replied if idx.get(p["stage"], -1) >= idx["applied"])
+        provenance["anchors"].update({
+            "scenario_outreach_to_apply": "~17%",
+            "observed_outreach_to_apply": f"{applied_from_outreach}/{len(contacted)} = {round(100 * applied_from_outreach / len(contacted))}%" if contacted else "n/a",
+            "scenario_responder_to_apply": "~37%",
+            "observed_responder_to_apply": f"{applied_from_replied}/{len(replied)} = {round(100 * applied_from_replied / len(replied))}%" if replied else "n/a",
+        })
 
     log(f"stages assigned: {dict(collections.Counter(p['stage'] for p in persons).most_common())}")
     log(f"biggest leak: {funnel['biggest_leak']}")

@@ -160,8 +160,48 @@ def dedupe_notion(rows, log):
     return merged
 
 
-def resolve(notion, portal, log):
-    """One person per human across systems. Key: email; portal profile attached where matched."""
+def build_outreach_index(heyreach, log):
+    """One outreach record per human, keyed by normalized linkedin url + email.
+    contacted = connection or message evidence; replied = MessageReply."""
+    if not heyreach:
+        return None
+    recs = {}
+    skipped = 0
+    for l in heyreach["leads"]:
+        prof = l.get("linkedInUserProfile") or {}
+        url = (prof.get("profileUrl") or "").rstrip("/").lower().replace("http://", "https://")
+        email = (prof.get("emailAddress") or "").strip().lower()
+        contacted = (l.get("leadConnectionStatus") in ("ConnectionSent", "ConnectionAccepted")
+                     or l.get("leadMessageStatus") in ("MessageSent", "MessageReply"))
+        if not (url or email):
+            skipped += 1
+            continue
+        key = url or f"email:{email}"
+        r = recs.setdefault(key, {
+            "urls": set(), "emails": set(), "campaigns": [], "contacted": False,
+            "replied": False, "connection_accepted": False,
+            "first_contact": None, "name": f'{prof.get("firstName") or ""} {prof.get("lastName") or ""}'.strip(),
+        })
+        r["urls"].add(url) if url else None
+        if email:
+            r["emails"].add(email)
+        r["campaigns"].append(l["campaign_id"])
+        r["contacted"] |= contacted
+        r["replied"] |= l.get("leadMessageStatus") == "MessageReply"
+        r["connection_accepted"] |= l.get("leadConnectionStatus") == "ConnectionAccepted"
+        ts = l.get("creationTime") or l.get("lastActionTime")
+        if contacted and ts and (r["first_contact"] is None or ts < r["first_contact"]):
+            r["first_contact"] = ts
+    log(f"heyreach index: {len(recs)} unique leads ({skipped} skipped: no url/email), "
+        f"{sum(1 for r in recs.values() if r['contacted'])} contacted, "
+        f"{sum(1 for r in recs.values() if r['replied'])} replied")
+    return recs
+
+
+def resolve(notion, portal, log, outreach=None):
+    """One person per human across systems. Key: email; portal profile attached where matched.
+    Outreach (HeyReach) joins by linkedin_url first, then email; unjoined contacted leads
+    become heyreach-only persons so the funnel top is real people, not a detached number."""
     full = portal["experts_full"]
     directory_ids = {e["id"] for e in portal["experts_index"]}
     deals_by_expert = {}
@@ -188,6 +228,40 @@ def resolve(notion, portal, log):
         f"({len(matched)} matched to portal by email) + {len(portal_only)} portal-only")
     log(f"resolve: of portal-only, {sum(1 for e in portal_only if e not in directory_ids)} "
         f"are board-only experts (absent from directory)")
+
+    if outreach:
+        by_url, by_email = {}, {}
+        for key, r in outreach.items():
+            for u in r["urls"]:
+                by_url[u] = r
+            for e in r["emails"]:
+                by_email.setdefault(e, r)
+        joined_recs, join_url, join_email = set(), 0, 0
+        for p in persons:
+            r = by_url.get(p.get("linkedin_url") or "")
+            if r:
+                join_url += 1
+            else:
+                r = by_email.get(p.get("email") or "")
+                if r:
+                    join_email += 1
+            if r:
+                joined_recs.add(id(r))
+                p["outreach"] = {k: sorted(v) if isinstance(v, set) else v for k, v in r.items() if k != "name"}
+        added = 0
+        for r in outreach.values():
+            if r["contacted"] and id(r) not in joined_recs:
+                persons.append({
+                    "sources": ["heyreach"], "expert_id": None, "name": r["name"],
+                    "email": (sorted(r["emails"]) or [None])[0],
+                    "linkedin_url": (sorted(u for u in r["urls"] if u) or [None])[0],
+                    "channel": "linkedin",
+                    "outreach": {k: sorted(v) if isinstance(v, set) else v for k, v in r.items() if k != "name"},
+                })
+                added += 1
+        log(f"outreach join: {join_url} by linkedin_url + {join_email} by email = "
+            f"{join_url + join_email} spine persons with outreach evidence; "
+            f"{added} contacted-but-never-applied leads added as heyreach-only persons")
     return persons
 
 

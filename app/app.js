@@ -20,8 +20,8 @@ const FORMULAS = {
   project_applied: 'Has ≥1 deal (any stage) on the pipeline board.',
   staffed: 'Has ≥1 deal that ever reached active/paused/ended.',
   second_contract: '≥2 deals that reached staffed.',
-  outreached: 'Not measurable: every exported row already applied. Outreach volume lives outside the trial data.',
-  responded: 'No field in either system records a reply to outreach.',
+  outreached: 'LinkedIn leads with contact evidence in HeyReach (connection sent/accepted or message sent). LinkedIn outreach only — other channels enter the funnel at Applied.',
+  responded: 'HeyReach leads with leadMessageStatus = MessageReply. LinkedIn outreach only.',
   assessment_taken: 'Portal test fields are null on all 855 deals; sampled submissions empty.',
   first_billable: 'lifetime_hours > 0 — currently 0 for every profile; billable data not instrumented.',
 };
@@ -72,7 +72,7 @@ function funnelView() {
   <div class="panel"><div class="controls">
     <label>Channel <select id="chan"><option value="">All channels</option>
       ${chans.map(c => `<option ${state.channel === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
-    <span class="fconv">${fmt(src.applied)} people in scope</span>
+    <span class="fconv">${fmt(src.applied)} applicants in scope${M.funnel.outreach_note ? ' · ' + esc(M.funnel.outreach_note) : ''}</span>
   </div>`;
 
   let prevMeasured = null;
@@ -196,9 +196,13 @@ function dormantView() {
 
 function anchorsBox() {
   const a = M.provenance.anchors;
+  const extra = a.observed_outreach_to_apply
+    ? ` Outreach→apply ${esc(a.scenario_outreach_to_apply)} → <b>${esc(a.observed_outreach_to_apply)}</b>;
+       responder→apply ${esc(a.scenario_responder_to_apply)} → <b>${esc(a.observed_responder_to_apply)}</b>
+       (joins by LinkedIn URL/email — undercounts when application email ≠ LinkedIn email).` : '';
   return `<div class="panel" style="font-size:12.5px;color:var(--ink-2)">
-  Sanity anchors — scenario doc vs. observed: candidates ${esc(a.scenario_doc_candidates)} → <b>${fmt(a.observed_persons)}</b>;
-  accepted-never-project ${esc(a.scenario_accepted_never_project)} → <b>${esc(a.observed)}</b>.
+  Sanity anchors — scenario doc vs. observed: candidates ${esc(a.scenario_doc_candidates)} → <b>${fmt(a.observed_persons)}</b> (incl. LinkedIn-outreach-only);
+  accepted-never-project ${esc(a.scenario_accepted_never_project)} → <b>${esc(a.observed)}</b>.${extra}
   Differences are recorded findings, not errors — see METHODOLOGY.md.</div>`;
 }
 

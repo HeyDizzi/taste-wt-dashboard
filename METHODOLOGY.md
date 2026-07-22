@@ -140,6 +140,28 @@ One command: `.venv/bin/python pipeline/run.py` → `data/processed/{persons,met
   project contact (−830); dormant pool 1,307 = 830 never-offered + 477 offered-not-converted;
   VAR proxy 52/1,441 = 3.6%.
 
+## Step 5 — HeyReach outreach integration (2026-07-22 ~14:2x–14:4x)
+
+- `scripts/fetch_heyreach.py` pulled the LinkedIn outreach layer into `data/raw/heyreach/`:
+  50 campaigns, 18,789 lead rows, 4,515 conversations, overall stats. All endpoints returned
+  ok (their API is known to 404 on some routes; outcomes recorded in `heyreach_manifest.json`).
+- Lead dedup by profile URL/email: 18,789 rows → 10,858 unique leads; 9,442 with contact
+  evidence (connection sent/accepted or message sent), 2,813 with `MessageReply`.
+- **Join to spine**: 669 by normalized `linkedin_url` + 67 by email = 736 spine persons with
+  outreach evidence. 8,733 contacted-but-never-applied leads added as heyreach-only persons
+  → spine now 11,274. Join undercounts by construction (application email ≠ LinkedIn email,
+  URL variants); recorded, not corrected.
+- **Funnel semantics decision**: `outreached`/`responded` use direct evidence counts
+  (LinkedIn-outreach only), because applying does not imply having been outreached — other
+  entry channels exist. `applied`+ stays furthest-stage. Labeled on the dashboard.
+- Stages 1–2 are no longer "not instrumented": funnel top = 9,445 contacted → 2,815
+  replied (30%) → 2,541 applied. Biggest-absolute-leak highlight moved to
+  outreached→responded (−6,630) per the brief's rule; interpretation (reply rate is
+  channel-normal, vetted-pool leak is not) lives in `deliverables/01`.
+- Anchor reconciliation: doc claimed ~17% outreach→apply, observed 8% (712/9,445);
+  ~37% responder→apply, observed 24% (681/2,815). Both roughly half the remembered
+  figures — partially explainable by join undercount; recorded, not resolved.
+
 ## Step 2 — Navigable raw-data explorer (`scripts/build_explorer.py`)
 
 - Generates `data/raw/funnel.explorer.html`: a single self-contained file embedding the full

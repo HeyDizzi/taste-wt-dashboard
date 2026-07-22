@@ -23,3 +23,6 @@ app/public/data/*.json
 # OS / editor noise
 .DS_Store
 *.log
+
+# Licensed font binaries — keep local, do not redistribute via git
+fonts/
