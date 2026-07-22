@@ -229,8 +229,9 @@ function concentrationProxyView() {
       <span class="l" data-tip="Experts holding >1 currently-active deal.">experts on multiple active deals</span></div>
     <div class="tile"><div class="v">${fmt(M.deal_concentration?.active_now ?? 52)}</div>
       <span class="l" data-tip="Experts with ≥1 deal currently in stage 'active'.">experts active right now</span></div>
-    <div class="tile"><div class="v leak">${fmt(H.vetted_never_staffed)}</div>
-      <span class="l" data-tip="Accepted, never reached a staffed deal.">vetted bench sitting idle</span></div>
+    <div class="tile wide"><div class="v leak">${fmt(H.vetted_never_staffed)}</div>
+      <span class="l" data-tip="Accepted, never reached a staffed deal (cross-system spine). The mini bar reconciles this with the portal's availability labels below.">vetted, never staffed</span>
+      ${decompBar()}</div>
   </div>
   <div class="panel"><h2 style="font-size:13.5px">Availability status (portal profiles)</h2>
   ${avOrder.map(([k, v]) => `<div class="hrow"><span class="hl">${esc(k)}</span>
@@ -239,6 +240,26 @@ function concentrationProxyView() {
   <p class="sub" style="margin-top:10px">Red = bench states (available but not working).</p></div>`;
 }
 VIEWS[3].render = concentrationProxyView;
+
+function decompBar() {
+  const d = M.dormant_decomposition;
+  if (!d) return '';
+  const total = d.not_in_portal + d.benched + d.in_motion + d.other;
+  const segs = [
+    { k: 'not_in_portal', label: 'not in portal', n: d.not_in_portal, cls: 'dseg-red',
+      tip: 'Accepted in Notion (Welcome Sent) but never entered the staffing portal at all — invisible to staffing.' },
+    { k: 'benched', label: 'benched', n: d.benched, cls: 'dseg-red2',
+      tip: 'Portal availability = active_not_on_project or idle.' },
+    { k: 'in_motion', label: 'in motion', n: d.in_motion, cls: 'dseg-gray',
+      tip: 'Portal availability = contracting / applied to a project / testing — moving, but never yet staffed.' },
+    { k: 'other', label: 'other', n: d.other, cls: 'dseg-gray',
+      tip: 'Portal profile with no bench/motion availability label.' },
+  ].filter(s => s.n > 0);
+  return `<div class="dbar">${segs.map(s =>
+      `<div class="dseg ${s.cls}" style="flex:${s.n}" data-tip="${esc(s.tip)} (${fmt(s.n)} people)"></div>`).join('')}</div>
+    <div class="dlegend">${segs.map(s => `<span>${esc(s.label)} <b>${fmt(s.n)}</b></span>`).join('')}</div>
+    <div class="n">${fmt(total)} total · the red availability bars below also include ${fmt(d.benched_bars_extra)} previously-staffed people not in this pool</div>`;
+}
 
 /* ---------- shell ---------- */
 function render() {

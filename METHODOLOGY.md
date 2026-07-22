@@ -162,6 +162,18 @@ One command: `.venv/bin/python pipeline/run.py` → `data/processed/{persons,met
   ~37% responder→apply, observed 24% (681/2,815). Both roughly half the remembered
   figures — partially explainable by join undercount; recorded, not resolved.
 
+## Step 6 — Dormant-pool ↔ availability reconciliation (2026-07-22 ~15:3x)
+
+Question raised in review: the Concentration view's red tile (1,307 vetted-never-staffed)
+didn't sum with the red availability bars (399 + 137 = 536). Decomposition (now computed in
+`build_metrics.py` and drawn under the tile): **1,307 = 466 not in portal at all** (accepted
+in Notion, never entered the staffing system — invisible to staffing) **+ 510 benched**
+(active_not_on_project / idle) **+ 331 in motion** (contracting / applied / testing, still
+never staffed). The availability bars additionally contain 26 previously-staffed people who
+are dormant now but excluded from the never-staffed pool. The 466 invisible-to-staffing
+segment is itself a finding: a third of the vetted pool cannot be staffed by the portal
+because it doesn't know they exist.
+
 ## Step 2 — Navigable raw-data explorer (`scripts/build_explorer.py`)
 
 - Generates `data/raw/funnel.explorer.html`: a single self-contained file embedding the full

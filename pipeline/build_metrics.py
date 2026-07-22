@@ -172,6 +172,26 @@ def build(persons, portal, log):
         "multi_active": sum(1 for v in active_per_expert.values() if v > 1),
     }
 
+    # decompose the vetted-never-staffed pool by what the portal can see of it —
+    # reconciles the funnel-level pool with the portal's availability labels
+    BENCH = {"active_not_on_project", "idle"}
+    MOTION = {"contracting_project", "applied_project", "testing_project"}
+    decomp = {"not_in_portal": 0, "benched": 0, "in_motion": 0, "other": 0}
+    for p in vetted_never_staffed:
+        av = (p.get("portal") or {}).get("availability_status")
+        if not p.get("portal"):
+            decomp["not_in_portal"] += 1
+        elif av in BENCH:
+            decomp["benched"] += 1
+        elif av in MOTION:
+            decomp["in_motion"] += 1
+        else:
+            decomp["other"] += 1
+    pool_ids = {id(p) for p in vetted_never_staffed}
+    decomp["benched_bars_extra"] = sum(
+        1 for p in persons
+        if (p.get("portal") or {}).get("availability_status") in BENCH and id(p) not in pool_ids)
+
     # ---- provenance
     provenance = {
         "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
@@ -207,6 +227,7 @@ def build(persons, portal, log):
         "funnel": funnel, "headline": headline, "cohorts": cohort_out,
         "dormant": dormant, "dormant_split": dormant_split,
         "availability": dict(availability), "deal_concentration": deal_concentration,
+        "dormant_decomposition": decomp,
         "rule_variants": rule_variants(persons), "provenance": provenance,
     }
 
