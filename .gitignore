@@ -1,0 +1,20 @@
+# Real company data — never committed, even in a private repo.
+# The committed data/sample/ set (synthetic) powers the repo out of the box.
+data/raw/
+data/private/
+
+# Secrets — the taste-portal API key lives in .env
+.env
+.env.*
+
+# Generated artifacts that embed real data
+*.explorer.html
+
+# Node / build
+node_modules/
+dist/
+app/public/data/*.json
+
+# OS / editor noise
+.DS_Store
+*.log
