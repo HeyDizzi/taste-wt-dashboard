@@ -236,8 +236,7 @@ function concentrationProxyView() {
   ${avOrder.map(([k, v]) => `<div class="hrow"><span class="hl">${esc(k)}</span>
     <div class="hbar ${k === 'active_not_on_project' || k === 'idle' ? 'leakc' : ''}" data-tip="${fmt(v)} profiles: ${esc(k)}"
       style="width:${(100 * v / max).toFixed(1)}%"></div><span class="fnum">${fmt(v)}</span></div>`).join('')}
-  <p class="sub" style="margin-top:10px">Red = bench states (available but not working). What would complete this view:
-  hours per expert from timesheets/payments → top-10%/20% share of billable work, burnout-risk intervals.</p></div>`;
+  <p class="sub" style="margin-top:10px">Red = bench states (available but not working).</p></div>`;
 }
 VIEWS[3].render = concentrationProxyView;
 
