@@ -15,7 +15,7 @@ const STAGE_LABELS = {
 };
 const FORMULAS = {
   applied: 'People with a form submission (all Notion rows) or portal community_stage=applicant.',
-  assessment_passed: 'Portfolio Approval = Yes in either system. PROXY for the assessment stage — real assessment data is not instrumented.',
+  assessment_passed: 'Portfolio Approval = Yes in either system. PROXY for the assessment stage — real assessment data is not tracked.',
   accepted: 'Notion status ∈ {Welcome Sent, Active, Inactive} OR portal community_stage = accepted.',
   project_applied: 'Has ≥1 deal (any stage) on the pipeline board.',
   staffed: 'Has ≥1 deal that ever reached active/paused/ended.',
@@ -23,7 +23,7 @@ const FORMULAS = {
   outreached: 'LinkedIn leads with contact evidence in HeyReach (connection sent/accepted or message sent). LinkedIn outreach only — other channels enter the funnel at Applied.',
   responded: 'HeyReach leads with leadMessageStatus = MessageReply. LinkedIn outreach only.',
   assessment_taken: 'Portal test fields are null on all 855 deals; sampled submissions empty.',
-  first_billable: 'lifetime_hours > 0 — currently 0 for every profile; billable data not instrumented.',
+  first_billable: 'lifetime_hours > 0 — currently 0 for every profile; billable data not tracked.',
 };
 const RAMP = ['--ramp-1', '--ramp-2', '--ramp-3', '--ramp-4', '--ramp-5'];
 const STACK = ['applied', 'assessment_passed', 'accepted', 'project_applied', 'staffed_plus'];
@@ -68,7 +68,7 @@ function funnelView() {
   const chans = Object.keys(M.funnel.by_channel);
   let h = `<h2>The funnel</h2>
   <p class="sub">Bar width = people reaching <em>at least</em> each stage (absolute counts). The transition losing the
-  most people is marked red. Dashed rows are stages the data cannot see — missing instrumentation is a finding, not a gap in the chart.</p>
+  most people is marked red. Dashed rows are stages the data cannot see — missing tracking is a finding, not a gap in the chart.</p>
   <div class="panel"><div class="controls">
     <label>Channel <select id="chan"><option value="">All channels</option>
       ${chans.map(c => `<option ${state.channel === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
@@ -79,7 +79,7 @@ function funnelView() {
   for (const s of order) {
     if (src[s] == null) {
       h += `<div class="frow notinst"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
-        <div class="ftrack"></div><span class="badge">not instrumented</span></div>`;
+        <div class="ftrack"></div><span class="badge">not tracked</span></div>`;
       continue;
     }
     const isLeakFrom = leak && s === leak.from, isLeakTo = leak && s === leak.to;
@@ -122,13 +122,13 @@ function headlineView() {
       <div class="n">$<input id="cost" type="number" value="${cost}" min="0" step="50"> / designer
         <span class="tag">${edited ? 'edited' : 'assumption'}</span></div></div>
     <div class="tile"><div class="v">${H.activation_rate_proxy == null ? '—' : Math.round(H.activation_rate_proxy * 1000) / 10 + '%'}</div>
-      <span class="l" data-tip="Accepted experts currently on an active deal ÷ all accepted. PROXY: billable hours are not instrumented, so 'active deal now' stands in for 'billable in last 30d'.">activation rate (VAR proxy)</span>
+      <span class="l" data-tip="Accepted experts currently on an active deal ÷ all accepted. PROXY: billable hours are not tracked, so 'active deal now' stands in for 'billable in last 30d'.">activation rate (VAR proxy)</span>
       <div class="n">${esc(H.activation_note)}</div></div>
     <div class="tile"><div class="v">${H.median_days_to_staffed == null ? '—' : fmt(H.median_days_to_staffed) + 'd'}</div>
       <span class="l" data-tip="Median days from application submission to first deal reaching a staffed stage, for people with both timestamps.">median time to staffed</span>
-      <div class="n">${H.median_days_to_staffed == null ? 'not instrumented (no usable timestamp pairs)' : 'application → first staffed deal'}</div></div>
+      <div class="n">${H.median_days_to_staffed == null ? 'not tracked (no usable timestamp pairs)' : 'application → first staffed deal'}</div></div>
     <div class="tile"><div class="v">${fmt(H.second_contract)}</div>
-      <span class="l" data-tip="People with ≥2 deals that reached a staffed stage. True R2C needs billable data — not instrumented.">repeat contracts (R2C n)</span>
+      <span class="l" data-tip="People with ≥2 deals that reached a staffed stage. True R2C needs billable data — not tracked.">repeat contracts (R2C n)</span>
       <div class="n">${esc(H.r2c_note)}</div></div>
   </div>` + anchorsBox();
 }
@@ -213,9 +213,9 @@ function concentrationProxyView() {
   const avOrder = Object.entries(av).sort((a, b) => b[1] - a[1]);
   const max = Math.max(...avOrder.map(([, v]) => v), 1);
   return `<h2>Utilization &amp; concentration</h2>
-  <div class="warnbox">Billable hours are <b>not instrumented</b> (lifetime_hours = 0 on all 975 profiles; deal rates null).
+  <div class="warnbox">Billable hours are <b>not tracked</b> (lifetime_hours = 0 on all 975 profiles; deal rates null).
   True concentration of billable work cannot be computed — this view shows the nearest proxies and is itself finding #1
-  of the instrumentation gaps.</div>
+  of the tracking gaps.</div>
   <div class="tiles">
     <div class="tile"><div class="v">${fmt(M.deal_concentration?.multi_active ?? 3)}</div>
       <span class="l" data-tip="Experts holding >1 currently-active deal.">experts on multiple active deals</span></div>

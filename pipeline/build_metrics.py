@@ -119,9 +119,9 @@ def build(persons, portal, log):
         "accepted_total": len(accepted),
         "cost_per_vetted_default": 500,           # editable in UI; FP&A to confirm
         "activation_rate_proxy": round(len(active_now) / len(accepted), 4) if accepted else None,
-        "activation_note": "proxy = on an active deal now; billable hours not instrumented",
+        "activation_note": "proxy = on an active deal now; billable hours not tracked",
         "median_days_to_staffed": median_days_to_staffed(staffed_plus),
-        "r2c": None, "r2c_note": "first_billable not instrumented; second_contract measured off staffed deals",
+        "r2c": None, "r2c_note": "first_billable not tracked; second_contract measured off staffed deals",
         "second_contract": sum(1 for p in persons if p["stage"] == "second_contract"),
     }
 
