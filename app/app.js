@@ -67,8 +67,6 @@ function funnelView() {
 
   const chans = Object.keys(M.funnel.by_channel);
   let h = `<h2>The funnel</h2>
-  <p class="sub">Bar width = people reaching <em>at least</em> each stage (absolute counts). The transition losing the
-  most people is marked red. Dashed rows are stages the data cannot see — missing tracking is a finding, not a gap in the chart.</p>
   <div class="panel"><div class="controls">
     <label>Channel <select id="chan"><option value="">All channels</option>
       ${chans.map(c => `<option ${state.channel === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
@@ -94,7 +92,7 @@ function funnelView() {
     prevMeasured = src[s];
   }
   h += `</div>`;
-  return h + anchorsBox();
+  return h;
 }
 
 function biggestLeak(src, measured) {
@@ -130,7 +128,7 @@ function headlineView() {
     <div class="tile"><div class="v">${fmt(H.second_contract)}</div>
       <span class="l" data-tip="People with ≥2 deals that reached a staffed stage. True R2C needs billable data — not tracked.">repeat contracts (R2C n)</span>
       <div class="n">${esc(H.r2c_note)}</div></div>
-  </div>` + anchorsBox();
+  </div>`;
 }
 
 function concentrationView() {
@@ -194,18 +192,6 @@ function dormantView() {
   </tbody></table></div>`;
 }
 
-function anchorsBox() {
-  const a = M.provenance.anchors;
-  const extra = a.observed_outreach_to_apply
-    ? ` Outreach→apply ${esc(a.scenario_outreach_to_apply)} → <b>${esc(a.observed_outreach_to_apply)}</b>;
-       responder→apply ${esc(a.scenario_responder_to_apply)} → <b>${esc(a.observed_responder_to_apply)}</b>
-       (joins by LinkedIn URL/email — undercounts when application email ≠ LinkedIn email).` : '';
-  return `<div class="panel" style="font-size:12.5px;color:var(--ink-2)">
-  Sanity anchors — scenario doc vs. observed: candidates ${esc(a.scenario_doc_candidates)} → <b>${fmt(a.observed_persons)}</b> (incl. LinkedIn-outreach-only);
-  accepted-never-project ${esc(a.scenario_accepted_never_project)} → <b>${esc(a.observed)}</b>.${extra}
-  Differences are recorded findings, not errors — see METHODOLOGY.md.</div>`;
-}
-
 /* ---------- concentration uses deal-count proxy assembled client-side from dormant+headline ---------- */
 function concentrationProxyView() {
   const H = M.headline;
@@ -238,12 +224,6 @@ function render() {
   $('#nav').innerHTML = Object.entries(VIEWS).map(([k, v]) =>
     `<button class="${+k === view ? 'on' : ''}" data-v="${k}">${k} ${v.name}</button>`).join('');
   $('#main').innerHTML = VIEWS[view].render();
-  const p = M.provenance;
-  $('#provenance').textContent =
-    `Data: portal fetched ${p.portal_fetched_at} · pipeline ${p.generated_at} · ${fmt(p.persons_total)} persons ` +
-    `(${Object.entries(p.sources).map(([k, v]) => `${v} ${k}`).join(', ')}) · ` +
-    `${p.same_email_rows_collapsed} duplicate rows collapsed · ${p.possible_same_name_flagged} possible dupes flagged (not merged) · ` +
-    `${p.portfolio_review_conflicts} cross-system conflicts recorded · PRIVATE — real personal data`;
   $('#chan')?.addEventListener('change', e => { state.channel = e.target.value; render(); });
   $('#split')?.addEventListener('change', e => { state.split = e.target.value; render(); });
   $('#cost')?.addEventListener('change', e => { state.cost = +e.target.value || 0; render(); });
