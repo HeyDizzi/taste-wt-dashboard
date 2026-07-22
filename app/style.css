@@ -1,4 +1,18 @@
 /* Quiet diagnostic styling. One accent (blue); red reserved for leak/dormant only. */
+/* Brand fonts: Matter (UI), Azeret Semimono (numerals). Files live in /fonts (gitignored,
+   licensed) — the stack falls back to system fonts on a clone without them. */
+@font-face { font-family: 'Matter'; src: url('../fonts/Matter-Thin.ttf') format('truetype');
+  font-weight: 100; font-display: swap; }
+@font-face { font-family: 'Matter'; src: url('../fonts/Matter-Light.ttf') format('truetype');
+  font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Matter'; src: url('../fonts/Matter.ttf') format('truetype');
+  font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Matter'; src: url('../fonts/Matter-Medium.ttf') format('truetype');
+  font-weight: 500 700; font-display: swap; }
+@font-face { font-family: 'Azeret Semimono'; src: url('../fonts/Azeret_Semimono-Light.otf') format('opentype');
+  font-weight: 300; font-display: swap; }
+@font-face { font-family: 'Azeret Semimono'; src: url('../fonts/Azeret_Semimono.otf') format('opentype');
+  font-weight: 400 700; font-display: swap; }
 :root {
   color-scheme: light;
   --page: #f9f9f7; --surface: #fcfcfb;
@@ -21,8 +35,9 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--page); color: var(--ink);
-  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 14px/1.5 'Matter', system-ui, -apple-system, "Segoe UI", sans-serif;
   min-height: 100vh; display: flex; flex-direction: column; }
+.v, .hero-v, .fnum, .funconv, td.num, .tile input { font-family: 'Azeret Semimono', ui-monospace, monospace; }
 header { display: flex; align-items: center; gap: 18px; padding: 12px 22px;
   background: var(--surface); border-bottom: 1px solid var(--grid); position: sticky; top: 0; z-index: 5; }
 h1 { font-size: 15px; margin: 0; font-weight: 650; }
