@@ -38,6 +38,16 @@ h2 { font-size: 15px; margin: 2px 0 4px; }
 footer { padding: 10px 22px; color: var(--muted); font-size: 12px;
   border-top: 1px solid var(--grid); background: var(--surface); }
 
+/* ---- north star hero */
+.hero { background: var(--surface); border: 1px solid var(--ring); border-left: 4px solid var(--accent);
+  border-radius: 12px; padding: 22px 26px; margin-bottom: 14px; }
+.hero-tag { color: var(--accent); font-size: 12px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; }
+.hero-v { font-size: 64px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
+.hero-l { font-size: 16px; font-weight: 650; margin-top: 2px;
+  border-bottom: 1px dotted var(--muted); display: inline-block; cursor: help; }
+.hero-n { color: var(--ink-2); font-size: 13px; margin-top: 6px; max-width: 78ch; }
+
 /* ---- stat tiles */
 .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); gap: 12px; margin-bottom: 20px; }
 .tile { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; }

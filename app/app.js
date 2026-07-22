@@ -109,19 +109,24 @@ function headlineView() {
   const cost = state.cost ?? H.cost_per_vetted_default;
   const costTotal = H.vetted_never_staffed * cost;
   const edited = state.cost != null;
+  const varPct = H.activation_rate_proxy == null ? '—' : Math.round(H.activation_rate_proxy * 1000) / 10 + '%';
+  const activeNow = M.deal_concentration?.active_now;
   return `<h2>Headline metrics</h2>
-  <p class="sub">The five numbers the funnel story hangs on. Hover any label for its exact formula.</p>
+  <div class="hero" data-tip="Accepted experts currently on an active deal ÷ all accepted. PROXY: billable hours are not tracked, so 'active deal now' stands in for 'billable in last 30d'. Numerator upgrades automatically when billable data lands.">
+    <div class="hero-tag">★ North Star</div>
+    <div class="hero-v">${varPct}</div>
+    <div class="hero-l">Vetted Activation Rate (VAR)</div>
+    <div class="hero-n">${fmt(activeNow)} of ${fmt(H.accepted_total)} accepted experts on an active project ·
+      the one number both sides of the marketplace move — it cannot be gamed by recruiting more or by over-using a few designers</div>
+  </div>
   <div class="tiles">
     <div class="tile"><div class="v leak">${fmt(H.vetted_never_staffed)}</div>
       <span class="l" data-tip="Accepted-stage people (either system) whose furthest stage is below Staffed. ${fmt(H.vetted_never_staffed)} of ${fmt(H.accepted_total)} accepted.">vetted, never staffed</span>
-      <div class="n">${pct(H.vetted_never_staffed, H.accepted_total)} of ${fmt(H.accepted_total)} accepted</div></div>
+      <div class="n">${pct(H.vetted_never_staffed, H.accepted_total)} of ${fmt(H.accepted_total)} accepted — the pool VAR grows from</div></div>
     <div class="tile"><div class="v leak">$${fmt(costTotal)}</div>
       <span class="l" data-tip="vetted_never_staffed × cost per vetted designer. Cost input is editable — FP&A to confirm.">sunk vetting cost</span>
       <div class="n">$<input id="cost" type="number" value="${cost}" min="0" step="50"> / designer
         <span class="tag">${edited ? 'edited' : 'assumption'}</span></div></div>
-    <div class="tile"><div class="v">${H.activation_rate_proxy == null ? '—' : Math.round(H.activation_rate_proxy * 1000) / 10 + '%'}</div>
-      <span class="l" data-tip="Accepted experts currently on an active deal ÷ all accepted. PROXY: billable hours are not tracked, so 'active deal now' stands in for 'billable in last 30d'.">activation rate (VAR proxy)</span>
-      <div class="n">${esc(H.activation_note)}</div></div>
     <div class="tile"><div class="v">${H.median_days_to_staffed == null ? '—' : fmt(H.median_days_to_staffed) + 'd'}</div>
       <span class="l" data-tip="Median days from application submission to first deal reaching a staffed stage, for people with both timestamps.">median time to staffed</span>
       <div class="n">${H.median_days_to_staffed == null ? 'not tracked (no usable timestamp pairs)' : 'application → first staffed deal'}</div></div>
