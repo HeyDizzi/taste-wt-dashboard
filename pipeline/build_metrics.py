@@ -117,7 +117,7 @@ def build(persons, portal, log):
     headline = {
         "vetted_never_staffed": len(vetted_never_staffed),
         "accepted_total": len(accepted),
-        "cost_per_vetted_default": 500,           # editable in UI; FP&A to confirm
+        "cost_per_vetted_default": 150,           # editable in UI; FP&A to confirm
         "activation_rate_proxy": round(len(active_now) / len(accepted), 4) if accepted else None,
         "activation_note": "proxy = on an active deal now; billable hours not tracked",
         "median_days_to_staffed": median_days_to_staffed(staffed_plus),

@@ -7,7 +7,7 @@
 2. Assign each person their furthest canonical stage (mapping: `00-data-mapping.md`).
 3. Rank transitions by **absolute people lost**, not worst percentage — a 90% drop on 20
    people is noise; a 40% drop on 800 is the business problem.
-4. Price each leak: people lost × cost-per-vetted-designer (editable input; $500 assumption
+4. Price each leak: people lost × cost-per-vetted-designer (editable input; $150 default assumption
    until FP&A confirms).
 
 ## What the cleaned spine shows (pipeline run 2026-07-22; 2,541 persons)
@@ -31,7 +31,7 @@ statuses agree: 399 profiles are `active_not_on_project`, 137 `idle`, only 3 `ac
 
 ## Business impact framing
 
-At $500/vetted designer, 1,307 vetted-never-staffed (830 never offered + 477 offered but
-never converted) ≈ **$653k of sunk vetting spend** producing zero supply — before counting
+At $150/vetted designer, 1,307 vetted-never-staffed (830 never offered + 477 offered but
+never converted) ≈ **$196k of sunk vetting spend** producing zero supply — before counting
 acquisition spend above them in the funnel. Editable cost input in the dashboard; number
 updates when FP&A gives the real cost.
