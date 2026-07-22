@@ -4,9 +4,10 @@
 
 No build. Use data already in hand:
 
-1. **Target list (ready today):** 364 accepted experts with zero deals, plus 137 `idle`
-   profiles. Rank by: specialization match to the 12 open positions, rating (avg 3–4 scale
-   already scored), rate fit to position range, stated hours available.
+1. **Target list (ready today):** the 830 vetted people never offered a project (cleaned
+   spine; the dashboard's Dormant view is the list, sortable by portfolio score, rate fit and
+   days idle). Rank by: specialization match to the 12 open positions, portfolio score,
+   rate fit to position range, stated hours available.
 2. **Match against live demand:** 12 open positions + 4 auto-generated supply requests
    already sitting in the portal. The specialization enum is shared on both sides — the
    shortlist is a filter, not a project.
@@ -21,10 +22,10 @@ No build. Use data already in hand:
 - Marketplace-standard fixes (matching algorithm, availability calendar, self-serve board)
   are all "Next"-phase builds. The sprint is the manual version of all three and generates
   their spec.
-- Demand is the binding constraint for only part of the bench: 12 positions won't absorb 364
-  people. The sprint therefore also produces the **first real split of the dormant pool** —
-  "no matching demand exists" vs "offered and declined" — which have opposite fixes and are
-  currently indistinguishable (the #1 instrumentation gap).
+- Demand is the binding constraint for most of the bench: 12 positions won't absorb 830
+  people. The sprint's second output is therefore the demand-starvation evidence itself —
+  the cleaned spine already splits the dormant pool 830 never-offered vs 477
+  offered-not-converted, and the sprint tests how much of the 830 is matchable at all.
 
 ## Measured by
 

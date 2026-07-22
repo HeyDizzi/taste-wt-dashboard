@@ -101,7 +101,9 @@ vocab:
 stages:
   order: [outreached, responded, applied, assessment_taken, assessment_passed,
           accepted, project_applied, staffed, first_billable, second_contract]
-  not_instrumented: [responded, assessment_taken, first_billable]
+  # outreached is unmeasurable too: every exported row already applied, so outreach volume
+  # (and the ~17% outreach→apply anchor) does not exist in the trial data.
+  not_instrumented: [outreached, responded, assessment_taken, first_billable]
   rules:
     outreached:
       notion_status: [Outreach, Not started]

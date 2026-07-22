@@ -1,0 +1,9 @@
+{
+  "name": "taste-wt-dashboard",
+  "private": true,
+  "description": "Taste Labs expert funnel diagnostic — pipeline + dashboard (run locally, never deployed)",
+  "scripts": {
+    "dev": "make dev",
+    "refresh": "make refresh"
+  }
+}

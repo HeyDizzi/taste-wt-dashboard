@@ -137,6 +137,21 @@ def build(persons, portal, log):
     dormant.sort(key=lambda d: -(d["days_since_applied"] or 0))
     dormant_split = dict(collections.Counter(d["split"] for d in dormant))
 
+    # ---- utilization proxies (billable hours not instrumented — deal counts stand in)
+    availability = collections.Counter()
+    active_per_expert = collections.Counter()
+    for p in persons:
+        port = p.get("portal") or {}
+        if port.get("availability_status"):
+            availability[port["availability_status"]] += 1
+        n_active = sum(1 for d in port.get("deals", []) if d["stage"] == "active")
+        if n_active:
+            active_per_expert[p.get("expert_id")] = n_active
+    deal_concentration = {
+        "active_now": len(active_per_expert),
+        "multi_active": sum(1 for v in active_per_expert.values() if v > 1),
+    }
+
     # ---- provenance
     provenance = {
         "generated_at": datetime.datetime.now().isoformat(timespec="seconds"),
@@ -160,6 +175,7 @@ def build(persons, portal, log):
     return {
         "funnel": funnel, "headline": headline, "cohorts": cohort_out,
         "dormant": dormant, "dormant_split": dormant_split,
+        "availability": dict(availability), "deal_concentration": deal_concentration,
         "rule_variants": rule_variants(persons), "provenance": provenance,
     }
 

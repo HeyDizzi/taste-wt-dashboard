@@ -10,14 +10,18 @@
 4. Price each leak: people lost × cost-per-vetted-designer (editable input; $500 assumption
    until FP&A confirms).
 
-## What the raw data already shows (pre-cleaning, to be confirmed)
+## What the cleaned spine shows (pipeline run 2026-07-22; 2,541 persons)
 
-| Transition | Numbers as fetched | Read |
+| Transition | Cleaned numbers | Read |
 |---|---|---|
-| applied → portfolio passed | 548 of 2,478 rejected (22%); 823 `Welcome Sent` | healthy-looking screen, verify vs `Not started` backlog (370) |
-| **accepted → any project contact** | **364 of 553 accepted experts (66%) have zero deals ever** | the cliff. Doc anchor said ~50%; live data says worse |
-| project invite → active | of 855 deals: 198 still `invited`, 235 `rejected`, 55 `active` | second leak: invitations die on the vine (23% of all deals sit in `invited`, all with `invite_status: pending`) |
+| applied → portfolio passed | 2,541 → 1,797 (71%) | screening is not the problem |
+| passed → accepted | 1,797 → 1,441 (80%) | nor is acceptance |
+| **accepted → any project contact** | **1,441 → 611: −830 people (58% never contacted)** | **the biggest absolute leak in the funnel** |
+| project contact → staffed | 611 → 134 (22%) | second leak: of 855 deals, 198 sit at `invited`/pending indefinitely, 235 rejected |
 | staffed → billable | not measurable — `lifetime_hours` = 0 for every profile | instrumentation gap, not a funnel finding |
+
+(An earlier portal-only cut said 364/553 = 66%; the cross-system spine supersedes it — the
+leak is bigger than either system shows alone.)
 
 Working hypothesis to interrogate, not assert: the funnel's constraint is not recruiting
 volume or screening quality — it is **matching throughput after acceptance**. Availability
@@ -25,6 +29,7 @@ statuses agree: 399 profiles are `active_not_on_project`, 137 `idle`, only 3 `ac
 
 ## Business impact framing
 
-At $500/vetted designer, 364 accepted-never-staffed ≈ **$182k of sunk vetting spend**
-producing zero supply — before counting the acquisition spend above them in the funnel.
-Sensitivity slider in the dashboard; number updates when FP&A gives the real cost.
+At $500/vetted designer, 1,307 vetted-never-staffed (830 never offered + 477 offered but
+never converted) ≈ **$653k of sunk vetting spend** producing zero supply — before counting
+acquisition spend above them in the funnel. Editable cost input in the dashboard; number
+updates when FP&A gives the real cost.

@@ -126,6 +126,20 @@ One command: `.venv/bin/python pipeline/run.py` → `data/processed/{persons,met
 - Reconciliation vs. scenario doc: ~1,500 candidates claimed; observed 2,541 persons
   (recorded, not resolved — the doc may predate recent recruiting waves).
 
+## Step 4 — Dashboard (2026-07-22 ~13:2x, `app/`)
+
+- Static app (no build step) renders `data/processed/metrics.json` only — zero data logic in
+  the browser. `make dev` → http://127.0.0.1:8471/app/, keys 1–5 switch views. Deviation from
+  the brief's Vite+React plan recorded: cut for scope, the pipeline is the deliverable's core.
+- Chart colors follow the validated reference palette (ordinal blue ramps re-validated for
+  this app: 5-step light + dark both pass; a 6-step light ramp FAILED adjacent-ΔL, so the
+  cohort stack folds `second_contract` into `staffed+`). Red is reserved for leak/dormant.
+- Display rule: `outreached` marked not-instrumented after finding that every exported row
+  already applied — showing 2,541 "outreached" would have implied outreach volume we don't have.
+- Deliverable docs updated from portal-only to cleaned-spine numbers: leak = accepted →
+  project contact (−830); dormant pool 1,307 = 830 never-offered + 477 offered-not-converted;
+  VAR proxy 52/1,441 = 3.6%.
+
 ## Step 2 — Navigable raw-data explorer (`scripts/build_explorer.py`)
 
 - Generates `data/raw/funnel.explorer.html`: a single self-contained file embedding the full
