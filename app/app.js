@@ -71,35 +71,44 @@ function funnelView() {
     <label>Channel <select id="chan"><option value="">All channels</option>
       ${chans.map(c => `<option ${state.channel === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
     <span class="fconv">${fmt(src.applied)} applicants in scope${M.funnel.outreach_note ? ' · ' + esc(M.funnel.outreach_note) : ''}</span>
-  </div>`;
+  </div><div class="funnel">`;
 
-  let prevMeasured = null;
+  const W = s => Math.max(100 * src[s] / max, 2.4);           // bar width, % of track
+  let prev = null;                                             // previous measured stage
   for (const s of order) {
     if (src[s] == null) {
-      h += `<div class="frow notinst"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
-        <div class="ftrack"></div><span class="badge">not tracked</span></div>`;
+      h += `<div class="fungap notinst"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
+        <span class="badge">not tracked</span></div>`;
       continue;
     }
-    const isLeakFrom = leak && s === leak.from, isLeakTo = leak && s === leak.to;
-    const conv = prevMeasured != null ? pct(src[s], prevMeasured) : '';
-    h += `<div class="frow"><span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
-      <div class="ftrack"><div class="fbar" data-tip="${fmt(src[s])} people reached at least ${STAGE_LABELS[s]}"
-        style="width:${(100 * src[s] / max).toFixed(1)}%"></div></div>
-      <span class="fnum">${fmt(src[s])} <span class="fconv ${isLeakTo ? 'leak' : ''}">${conv ? '· ' + conv : ''}</span></span></div>`;
-    if (isLeakFrom) {
-      h += `<div class="leakline"><span class="dot"></span> biggest leak: −${fmt(leak.lost)} people before ${STAGE_LABELS[leak.to]}</div>`;
+    if (prev != null) {
+      const isLeak = leak && prev === leak.from && s === leak.to;
+      const w1 = W(prev), w2 = W(s);
+      const cp = `polygon(${(50 - w1 / 2).toFixed(2)}% 0, ${(50 + w1 / 2).toFixed(2)}% 0, ${(50 + w2 / 2).toFixed(2)}% 100%, ${(50 - w2 / 2).toFixed(2)}% 100%)`;
+      h += `<div class="funconn${isLeak ? ' leakconn' : ''}"
+        data-tip="${STAGE_LABELS[prev]} → ${STAGE_LABELS[s]}: ${pct(src[s], src[prev])} continue, −${fmt(src[prev] - src[s])} people">
+        <div class="funtrap" style="clip-path:${cp}"></div>
+        <span class="funconv">${pct(src[s], src[prev])}</span>
+        ${isLeak ? `<span class="funleak">−${fmt(leak.lost)} · biggest leak</span>` : ''}</div>`;
     }
-    prevMeasured = src[s];
+    h += `<div class="funrow">
+      <span class="fl" data-tip="${esc(FORMULAS[s])}">${STAGE_LABELS[s]}</span>
+      <div class="funtrack"><div class="funbar" style="width:${W(s).toFixed(2)}%"
+        data-tip="${fmt(src[s])} people reached at least ${STAGE_LABELS[s]}"></div></div>
+      <span class="fnum">${fmt(src[s])}</span></div>`;
+    prev = s;
   }
-  h += `</div>`;
+  h += `</div></div>`;
   return h;
 }
 
 function biggestLeak(src, measured) {
+  // outreach transitions are conversion metrics, not leak candidates — leaks start at applied
   let best = null;
-  for (let i = 1; i < measured.length; i++) {
-    const lost = src[measured[i - 1]] - src[measured[i]];
-    if (!best || lost > best.lost) best = { from: measured[i - 1], to: measured[i], lost };
+  const eligible = measured.slice(Math.max(measured.indexOf('applied'), 0));
+  for (let i = 1; i < eligible.length; i++) {
+    const lost = src[eligible[i - 1]] - src[eligible[i]];
+    if (!best || lost > best.lost) best = { from: eligible[i - 1], to: eligible[i], lost };
   }
   return best;
 }

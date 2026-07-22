@@ -102,11 +102,15 @@ def build(persons, portal, log):
         "outreach_note": "outreached/responded = LinkedIn outreach evidence (HeyReach); "
                          "applied+ includes all entry channels" if has_outreach else None,
     }
-    # biggest absolute leak between measured adjacent stages
+    # biggest absolute leak between measured adjacent stages.
+    # Outreach-stage transitions are excluded from leak candidacy: losing cold outreach
+    # non-repliers is channel-normal conversion, not a business leak — leaks are losses of
+    # people the company has already invested in (applied onward).
     measured = [s for s in STAGES if s in funnel["combined"]]
     losses = [{"from": a, "to": b, "lost": funnel["combined"][a] - funnel["combined"][b]}
               for a, b in zip(measured, measured[1:])]
-    funnel["biggest_leak"] = max(losses, key=lambda x: x["lost"])
+    leak_candidates = [t for t in losses if idx[t["from"]] >= idx["applied"]]
+    funnel["biggest_leak"] = max(leak_candidates, key=lambda x: x["lost"])
     funnel["transitions"] = losses
 
     # ---- headline metrics

@@ -68,24 +68,28 @@ footer { padding: 10px 22px; color: var(--muted); font-size: 12px;
   border-radius: 7px; background: var(--surface); color: var(--ink); }
 .controls label { color: var(--ink-2); font-size: 13px; }
 
-/* funnel rows: thin bars, rounded data end, baseline-anchored */
-.frow { display: grid; grid-template-columns: 170px 1fr 130px; gap: 10px; align-items: center; padding: 7px 0; }
-.frow .fl { text-align: right; color: var(--ink-2); border-bottom: 1px dotted transparent; }
-.frow .fl:hover { border-color: var(--muted); cursor: help; }
-.ftrack { position: relative; height: 22px; border-left: 2px solid var(--baseline); }
-.fbar { position: absolute; inset: 0 auto 0 0; background: var(--accent);
-  border-radius: 0 4px 4px 0; min-width: 2px; }
-.fbar.leak-from { background: var(--accent); }
-.fnum { font-variant-numeric: tabular-nums; }
+/* funnel: centered silhouette with trapezoid connectors */
+.funnel { padding: 6px 0 2px; }
+.funrow { display: grid; grid-template-columns: 170px 1fr 110px; gap: 12px; align-items: center; }
+.fl { text-align: right; color: var(--ink-2); border-bottom: 1px dotted transparent; justify-self: end; }
+.fl:hover { border-color: var(--muted); cursor: help; }
+.funtrack { position: relative; height: 30px; }
+.funbar { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%);
+  background: var(--accent); border-radius: 4px; }
+.fnum { font-variant-numeric: tabular-nums; font-weight: 650; }
+.funconn { display: grid; grid-template-columns: 170px 1fr 110px; gap: 12px; align-items: center; }
+.funtrap { grid-column: 2; height: 20px; background: var(--accent-soft); opacity: .55; }
+.funconv { grid-column: 3; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.funconn { position: relative; }
+.funleak { position: absolute; left: calc(170px + 12px + 50%); transform: translateX(60px);
+  color: var(--leak); font-size: 12.5px; font-weight: 650; white-space: nowrap; }
+.leakconn .funtrap { background: var(--leak); opacity: .8; }
+.leakconn .funconv { color: var(--leak); font-weight: 650; }
+.fungap { display: grid; grid-template-columns: 170px 1fr; gap: 12px; align-items: center; padding: 3px 0; }
+.fungap .badge { justify-self: center; font-size: 11px; color: var(--muted);
+  border: 1px dashed var(--baseline); border-radius: 8px; padding: 1px 9px; }
+.notinst { opacity: .8; }
 .fconv { color: var(--muted); font-size: 12.5px; }
-.fconv.leak { color: var(--leak); font-weight: 650; }
-.notinst { opacity: .75; }
-.notinst .ftrack { border-left-style: dashed; }
-.notinst .badge { font-size: 11px; color: var(--muted); border: 1px dashed var(--baseline);
-  border-radius: 8px; padding: 1px 8px; }
-.leakline { display: flex; gap: 8px; align-items: center; margin: 4px 0 4px 180px;
-  color: var(--leak); font-size: 13px; font-weight: 600; }
-.leakline .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--leak); }
 
 /* generic h-bars (concentration etc.) */
 .hrow { display: grid; grid-template-columns: 210px 1fr 70px; gap: 10px; align-items: center; padding: 5px 0; }
