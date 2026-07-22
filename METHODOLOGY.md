@@ -71,6 +71,25 @@ Findings recorded at fetch time (leads for the analysis, not conclusions):
 - Board deal rows all show `test_status: null` and `invite_status: pending` dominates —
   the board's own summary fields look sparsely populated vs. the full deal records.
 
+## Step 1b — Notion export registered (2026-07-22 ~12:55)
+
+- Two manual CSV exports of the Notion "Main Application Database" arrived in the repo root
+  (Hudson is a guest in the workspace — API/MCP routes unavailable; export obtained another
+  way). **Moved into `data/raw/` immediately** (`notion_main_app_db.csv`,
+  `notion_main_app_db_all.csv`) — they were untracked but unprotected at the root.
+- Both files: 2,478 data rows. `_all` variant has 36 columns (superset: adds per-dimension
+  ratings, tools, years experience, AI comfort, `Latest comm`); base has 23. `_all` is the
+  pipeline input pending a subset check.
+- Profile at registration: `General Status` = Welcome Sent 823, Portfolio Rejected 548,
+  Outreach 452, Not started 370, Active 277, Inactive 7, DNU 1. Emails present 2,444
+  (2,375 distinct, 69 dups); **names 2,477 present but only 1,227 distinct — a 50% collision
+  rate vs 3% for emails. Anomaly flagged for diagnosis before any dedupe rule is chosen.**
+- Cross-system overlap by normalized email: 768/838 portal directory experts appear in the
+  Notion export; 843/975 of all fetched profiles.
+- Portal-side stats computed for deliverable drafts (from raw, pre-cleaning): accepted in
+  directory 553, of which **364 have no deal ever**; 52 experts on an active deal;
+  `lifetime_hours` = 0 for all 975 profiles; deal `rate` null on all 855 deals.
+
 ## Step 2 — Navigable raw-data explorer (`scripts/build_explorer.py`)
 
 - Generates `data/raw/funnel.explorer.html`: a single self-contained file embedding the full
