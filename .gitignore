@@ -2,6 +2,11 @@
 # The committed data/sample/ set (synthetic) powers the repo out of the box.
 data/raw/
 data/private/
+data/processed/
+
+# Python
+.venv/
+__pycache__/
 
 # Secrets — the taste-portal API key lives in .env
 .env

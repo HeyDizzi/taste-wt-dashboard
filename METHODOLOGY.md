@@ -90,6 +90,42 @@ Findings recorded at fetch time (leads for the analysis, not conclusions):
   directory 553, of which **364 have no deal ever**; 52 experts on an active deal;
   `lifetime_hours` = 0 for all 975 profiles; deal `rate` null on all 855 deals.
 
+## Step 3 — Cleaning pipeline (2026-07-22 ~13:2x, `pipeline/run.py`)
+
+One command: `.venv/bin/python pipeline/run.py` → `data/processed/{persons,metrics}.json`
++ `pipeline_log.txt` (the machine-written version of this section). Key numbers:
+
+- **Ingest**: 2,478 Notion rows, 34 mapped columns; base CSV verified as row-subset of `_all`
+  (0 extras) so `_all` is sole input. Dropped columns logged with fill counts; two initially
+  "dropped" columns were rescued on inspection:
+  - `Property` (2,216 filled) is **country**, misnamed in Notion → mapped.
+  - `Recruiting Portfolio Score` is a labeled 1–5 scale with non-score tags
+    (`Engineer` 64, `Offboarded` 25, `Social`) and multi-select joins → parsed to
+    max-numeric + tag list.
+- **Name-collision anomaly resolved**: the "full name" column is the Notion page *title*,
+  defaulting to "New submission" localized (`new submission` ×946, `novo envio` ×185,
+  `nueva respuesta` ×109, `nouvelle soumission` ×9). Real names = First + Last columns.
+  Field renamed `page_title`, excluded from identity.
+- **Dedupe** (rule: email = identity; latest submission wins, union of non-null fields):
+  2,478 → 2,375 unique emails (64 groups collapsed) + 34 no-email singletons.
+  22 rows flagged same-name/different-email (e.g. `isabella@…` vs `isabellaa@…` typo pair) —
+  flagged, NOT merged.
+- **Entity resolution**: 2,541 persons = 2,409 Notion-side (843 matched to portal by email)
+  + 132 portal-only (62 of them board-only, absent from the directory).
+- **Semantic finding**: `Outreach`/`Not started` status rows are ~100% filled with
+  application answers → everyone in the export APPLIED; "Outreach" records acquisition mode,
+  not funnel position. Therefore the observable funnel starts at `applied`; true outreach
+  volume (and the doc's ~17% outreach→apply anchor) is not measurable from trial data.
+- **Stage assignment** (rules in `mapping.yml`; alternatives + counts in
+  `metrics.rule_variants`): furthest-stage distribution — accepted 830, applied 744,
+  project_applied 477, assessment_passed 356, staffed 108, second_contract 26.
+- **Biggest absolute leak: accepted → project_applied, 830 people lost**
+  (1,441 reached at-least-accepted; 611 at-least-project_applied).
+- **Dormant pool**: 1,307 vetted-never-staffed = 830 never offered a deal + 477 offered but
+  never converted — the demand-starvation vs. friction split is now measurable.
+- Reconciliation vs. scenario doc: ~1,500 candidates claimed; observed 2,541 persons
+  (recorded, not resolved — the doc may predate recent recruiting waves).
+
 ## Step 2 — Navigable raw-data explorer (`scripts/build_explorer.py`)
 
 - Generates `data/raw/funnel.explorer.html`: a single self-contained file embedding the full

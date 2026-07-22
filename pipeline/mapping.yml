@@ -1,0 +1,130 @@
+# Canonical field mapping — the editable spec the pipeline reads.
+# Human-readable version with rationale: deliverables/00-data-mapping.md
+# Any raw column NOT listed under columns/drop is reported loudly by ingest.py.
+
+notion:
+  file: data/raw/notion_main_app_db_all.csv
+  subset_check_against: data/raw/notion_main_app_db.csv   # base export must be a row-subset
+  columns:
+    "Submission time": submission_ts
+    "What’s your email?": email
+    "First Name": first_name
+    "Last Name": last_name
+    "What’s your full name (first & last)?": page_title      # NOT a name: Notion page title, "New submission" localized on 1,249 rows
+    "Property": country_raw                                  # misnamed Notion column — holds country (2,216 rows)
+    "What is your WhatsApp phone number?": phone
+    "LinkedIn URL": linkedin_url
+    "Portfolio or Github URL": portfolio_url
+    "URL to your github": github_url
+    "Resume (PDF only)": resume
+    "How did you hear about Taste?": channel_raw
+    "Who on the team referred you?": referrer_team
+    "Who referred you? ": referrer_other                     # trailing space is real
+    "General Status": status_raw
+    "Are you currently a member of the TasteMakers Community?": member_flag
+    "Portfolio Approval": portfolio_review_raw
+    "Recruiting Portfolio Score": portfolio_score
+    "What is your specialization?": specialization_raw
+    "What is the range of your typical hourly rate (USD)?": rate_band
+    "How many hours per week are you typically available to work?": hours_band
+    "Years of design experience (years)": years_band
+    "How comfortable are you using AI/LLM tools in your design workflow? (1 = Never tried; 4 = Use daily)": ai_comfort
+    "Which tools are you an expert in? (Select all that apply)": tools_raw
+    "Initial Email Sent": initial_email_sent
+    "Last Contact Date": last_contact
+    "Latest comm": latest_comm
+    "Rating: 3D / Immersive & New Media (1 = Beginner; 4 = Expert)": rating_three_d
+    "Rating: Brand & Identity Design": rating_brand
+    "Rating: Digital / UI / Web Design (1 = Beginner; 4 = Expert)": rating_digital_ui
+    "Rating: Frontend Development / Design Engineering (1 = Beginner; 4 =Expert)": rating_frontend
+    "Rating: Illustration & Vector Design": rating_illustration
+    "Rating: Motion & Video (1 = Beginner; 4 = Expert)": rating_motion
+    "Rating: Office / Presentations (1 = Beginner; 4 = Expert)": rating_office
+  drop:                       # near-empty or attachment metadata; counts logged
+    - "Files & media"
+    - "Please Specify “Other”"
+    - "Presentation Type Expertise"
+
+vocab:
+  # Notion long labels → shared specialization enum (prefix match before "(")
+  specialization:
+    "3D / Immersive & New Media": three_d
+    "Digital / UI / Web Design": digital_ui
+    "Brand & Identity Design": brand
+    "Motion & Video": motion
+    "Illustration & Vector Design": illustration
+    "Frontend Development / Design Engineering": frontend
+    "Office / Presentations": office
+    "Other": other
+  # Notion channel labels → portal source enum (multi-select → first listed wins, all kept)
+  channel:
+    "Linkedin Message": linkedin
+    "Linkedin Job Posting": linkedin
+    "LinkedIn InMail": linkedin
+    "Taste Employee Referral": referral
+    "Referral by someone in Community": referral
+    "Contra": contra
+    "Behance": behance
+    "Dribble": dribbble
+    "X": x
+  rate_band:      # → [min, max]; null = open
+    "Under $20": [null, 20]
+    "$20-$40": [20, 40]
+    "$40-$60": [40, 60]
+    "$60-$80": [60, 80]
+    "$80-$100": [80, 100]
+    "$100+": [100, null]
+  hours_band:
+    "10-20": [10, 20]
+    "20-30": [20, 30]
+    "30-40": [30, 40]
+    "40+": [40, null]
+  years_band:     # multi-select rows take the widest span
+    "0-2": [0, 2]
+    "2-6": [2, 6]
+    "6-10": [6, 10]
+    "10-15": [10, 15]
+    "15+": [15, null]
+  country:                     # top variants unified; everything else passes through trimmed
+    "USA": "United States"
+    "US": "United States"
+    "Brasil": "Brazil"
+    "UK": "United Kingdom"
+  portfolio_review:            # both systems → yes/no/maybe/removed/very_junior
+    "Yes": "yes"
+    "No": "no"
+    "Maybe": "maybe"
+    "Removed from TM": removed
+    "Very Junior": very_junior
+
+# Canonical funnel stages, in order (brief). person.stage = furthest reached.
+stages:
+  order: [outreached, responded, applied, assessment_taken, assessment_passed,
+          accepted, project_applied, staffed, first_billable, second_contract]
+  not_instrumented: [responded, assessment_taken, first_billable]
+  rules:
+    outreached:
+      notion_status: [Outreach, Not started]
+      portal_community_stage: [sourced]
+    applied:
+      notion: has_submission_ts          # all 2,478 rows
+      portal_community_stage: [applicant]
+    assessment_passed:                   # PROXY: portfolio review as the assessment
+      proxy: portfolio_review == yes
+    accepted:
+      notion_status: [Welcome Sent, Active, Inactive]   # welcome = joined; Active/Inactive imply membership
+      portal_community_stage: [accepted]
+    project_applied:
+      portal: has_any_deal
+    staffed:
+      portal: any_deal_stage_in [active, paused, ended]
+    first_billable:
+      portal: lifetime_hours > 0         # currently 0 for ALL profiles → not instrumented
+    second_contract:
+      portal: deals_reaching_staffed >= 2
+  terminal:
+    rejected_screen:
+      notion_status: [Portfolio Rejected, DNU]
+      portal_community_stage: [rejected, removed]
+    dormant:
+      notion_status: [Inactive]
